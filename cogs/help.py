@@ -102,8 +102,7 @@ class Help(commands.Cog, name="Help command"):
     )
     async def help_command(self, ctx, *, entity=None):
         """
-        Sends a paginated help command or help for
-        an existing entity.
+        Sends a paginated help command or help for an existing entity.
         """
         # Inspired by nekozilla
 

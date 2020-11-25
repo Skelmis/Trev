@@ -21,8 +21,9 @@ intents = discord.Intents.all()
 bot = commands.Bot(
     command_prefix=".",
     case_insensitive=True,
-    description="The bot powering the DPY Anti-Spam community.",
+    description="The bot powering the DPY Anti-Spam community",
     intents=intents,
+    help_command=None
 )
 
 logger = logging.getLogger(__name__)
@@ -31,8 +32,6 @@ logger = logging.getLogger(__name__)
 # nickname mentions (<@!1234>)
 # This basically ONLY matches a string that only consists of a mention
 mention = re.compile(r"^<@!?(?P<id>\d+)>$")
-
-bot.remove_command("help")
 
 
 @bot.event
