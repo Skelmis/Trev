@@ -51,7 +51,7 @@ class Utility(commands.Cog):
             title=f"**Package Release:** `{tag}`",
             description=desc,
             color=color,
-            timestamp=ctx.message.created_at
+            timestamp=ctx.message.created_at,
         )
         embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
 
