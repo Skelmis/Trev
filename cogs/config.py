@@ -15,7 +15,9 @@ class Config(commands.Cog):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(
-        name="reload", description="Reload all/one of the bots cogs!", usage="[cog]",
+        name="reload",
+        description="Reload all/one of the bots cogs!",
+        usage="[cog]",
     )
     @commands.is_owner()
     async def reload(self, ctx, cog=None):
@@ -36,7 +38,8 @@ class Config(commands.Cog):
                             description += f"Reloaded: `{ext}`\n"
                         except Exception as e:
                             embed.add_field(
-                                name=f"Failed to reload: `{ext}`", value=e,
+                                name=f"Failed to reload: `{ext}`",
+                                value=e,
                             )
                     await asyncio.sleep(0.5)
                 embed.description = description
@@ -64,7 +67,8 @@ class Config(commands.Cog):
                     except Exception:
                         desired_trace = traceback.format_exc()
                         embed.add_field(
-                            name=f"Failed to reload: `{ext}`", value=desired_trace,
+                            name=f"Failed to reload: `{ext}`",
+                            value=desired_trace,
                         )
                 await asyncio.sleep(0.5)
             await ctx.send(embed=embed)
@@ -72,4 +76,3 @@ class Config(commands.Cog):
 
 def setup(bot):
     bot.add_cog(Config(bot))
-

@@ -23,7 +23,7 @@ bot = commands.Bot(
     case_insensitive=True,
     description="The bot powering the DPY Anti-Spam community",
     intents=intents,
-    help_command=None
+    help_command=None,
 )
 
 logger = logging.getLogger(__name__)
@@ -98,7 +98,7 @@ async def _eval(ctx, *, code):
     pager = Pag(
         timeout=180,
         use_defaults=True,
-        entries=[result[i: i + 2000] for i in range(0, len(result), 2000)],
+        entries=[result[i : i + 2000] for i in range(0, len(result), 2000)],
         length=1,
         prefix="```py\n",
         suffix="```",
