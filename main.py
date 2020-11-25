@@ -36,7 +36,7 @@ mention = re.compile(r"^<@!?(?P<id>\d+)>$")
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Game(name="with guild security."))
+    await bot.change_presence(activity=discord.Game(name="with guild security"))
 
     print(f"{bot.user.name} is now ready\n-----")
 

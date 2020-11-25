@@ -3,7 +3,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from utils.util import get_message
+from utils.util import get_message, review_embed
 
 
 class Utility(commands.Cog):
@@ -54,21 +54,13 @@ class Utility(commands.Cog):
             description=desc,
             color=color,
         )
-        m = await ctx.send("Preview:\nDo you want to send this?", embed=embed)
-        await m.add_reaction("👍")
 
-        def check(reaction, user):
-            return user.id == ctx.author.id and str(reaction.emoji) == '👍'
-
-        try:
-            reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check)
-        except asyncio.TimeoutError:
-            await ctx.send('👎')
-        else:
-            await ctx.send('👍')
-
+        if await review_embed(self.bot, ctx, embed):
             channel = await self.bot.fetch_channel(780786972859564043)
             await channel.send(release_ping_str, embed=embed)
+            await ctx.send(f"I sent that for you.")
+        else:
+            await ctx.send("Cancelling...")
 
 
 def setup(bot):

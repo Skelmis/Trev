@@ -43,3 +43,22 @@ async def get_message(
             return msg.content
     except asyncio.TimeoutError:
         return False
+
+
+async def review_embed(bot, ctx, embed) -> bool:
+    """Given an embed, send it and wait for a review"""
+    m = await ctx.send("Preview:\nYes | No", embed=embed, delete_after=35)
+    await m.add_reaction('👍')
+    await m.add_reaction('👎')
+
+    def check(reaction, user):
+        return user.id == ctx.author.id and str(reaction.emoji) in ['👍', '👎']
+
+    try:
+        reaction, user = await bot.wait_for('reaction_add', timeout=30, check=check)
+    except asyncio.TimeoutError:
+        return False
+    else:
+        if str(reaction.emoji) == '👍':
+            return True
+        return False
