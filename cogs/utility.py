@@ -43,17 +43,17 @@ class Utility(commands.Cog):
         tag = answers[1]
         if "v" not in tag.lower():
             tag = f"V{tag}"
-        tag = tag.capitalize()
-        tag = tag.replace(" ", "")
+        tag = tag.capitalize().replace(" ", "")
 
-        desc = answers[2]
-        desc += "\n\n------------\nGet it with:\n`pip install -U Discord-Anti-Spam`"
+        desc = f"{answers[2]}\n\n------------\nGet it with:\n`pip install -U Discord-Anti-Spam`"
 
         embed = discord.Embed(
-            title=f"**Release:** `{tag}`",
+            title=f"**Package Release:** `{tag}`",
             description=desc,
             color=color,
+            timestamp=ctx.message.created_at
         )
+        embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
 
         if await review_embed(self.bot, ctx, embed):
             channel = await self.bot.fetch_channel(780786972859564043)
