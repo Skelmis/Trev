@@ -56,7 +56,9 @@ async def on_message(message):
 
 @bot.event
 async def on_member_join(member):
-    if member.id in [493937661044719626]:
+    if member.id == 493937661044719626:
+        dev_role = member.guild.get_role(780788829917151263)
+        await member.add_roles(dev_role)
         return
 
     channel = bot.get_channel(780817944728174632)
