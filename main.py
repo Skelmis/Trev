@@ -54,6 +54,19 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
+@bot.event
+async def on_member_join(member):
+    if member.id in [493937661044719626]:
+        return
+
+    channel = bot.get_channel(780817944728174632)
+    start_chan = bot.get_channel(780784732966879233)
+    await channel.send(
+        f"Welcome {member.mention}!\nPlease check out {start_chan.mention} before continuing. Otherwise, enjoy the "
+        f"server! "
+    )
+
+
 @bot.command(description="Log the bot out.")
 @commands.is_owner()
 async def logout(ctx):
