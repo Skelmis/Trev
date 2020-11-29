@@ -30,7 +30,7 @@ class Utility(commands.Cog):
             ["What is the content for this release?", "\u2009"],
         ]
         answers = [
-            await get_message(self.bot, ctx, question[0], question[1])
+            await get_message(self.bot, ctx, question[0], question[1], timeout=500)
             for question in questions
         ]
 
