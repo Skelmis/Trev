@@ -48,8 +48,9 @@ async def on_message(message):
         return
 
     # Whenever the bot is tagged, respond with its prefix
-    if mention.match(message.content):
-        await message.channel.send(f"My prefix here is `.`", delete_after=15)
+    if match := mention.match(message.content):
+        if int(match.group("id")) == bot.user.id:
+            await message.channel.send(f"My prefix here is `.`", delete_after=15)
 
     await bot.process_commands(message)
 
