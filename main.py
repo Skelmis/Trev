@@ -19,11 +19,12 @@ with open("conf.json", "r") as f:
 intents = discord.Intents.all()
 
 bot = commands.Bot(
-    command_prefix=".",
+    command_prefix="py.",
     case_insensitive=True,
     description="The bot powering the DPY Anti-Spam community",
     intents=intents,
     help_command=None,
+    activity=discord.Game(name="with guild security")
 )
 
 logger = logging.getLogger(__name__)
@@ -36,8 +37,6 @@ mention = re.compile(r"^<@!?(?P<id>\d+)>$")
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Game(name="with guild security"))
-
     print(f"{bot.user.name} is now ready\n-----")
 
 

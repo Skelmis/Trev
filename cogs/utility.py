@@ -34,10 +34,7 @@ class Utility(commands.Cog):
             for question in questions
         ]
 
-        color_enum = {
-            "1": 0x2C3E50,  # Midnight grey
-            "2": 0xFF2800,  # Vibrant red
-        }
+        color_enum = {"1": 0x2C3E50, "2": 0xFF2800}  # Midnight grey  # Vibrant red
         color = color_enum.get(answers[0], 0x2C3E50)
 
         tag = answers[1]
