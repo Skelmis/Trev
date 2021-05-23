@@ -31,7 +31,7 @@ async def get_message(
         title=f"{content_one}",
         description=f"{content_two}",
     )
-    sent = await ctx.send(embed=embed)
+    await ctx.send(embed=embed)
     try:
         msg = await bot.wait_for(
             "message",
