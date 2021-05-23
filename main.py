@@ -15,8 +15,21 @@ token = os.getenv("TOKEN")
 
 intents = discord.Intents.all()
 
+PREFIX = "py."
+
+
+async def get_prefix(bot, message):
+    prefix = PREFIX
+    if message.content.casefold().startswith(prefix.casefold()):
+        # The prefix matches, now return the one the user used
+        # such that dpy will dispatch the given command
+        prefix_length = len(prefix)
+        prefix = message.content[:prefix_length]
+
+    return commands.when_mentioned_or(prefix)(bot, message)
+
 bot = commands.Bot(
-    command_prefix="py.",
+    command_prefix=get_prefix,
     case_insensitive=True,
     description="The bot powering the DPY Anti-Spam community",
     intents=intents,
@@ -46,7 +59,7 @@ async def on_message(message):
     # Whenever the bot is tagged, respond with its prefix
     if match := mention.match(message.content):
         if int(match.group("id")) == bot.user.id:
-            await message.channel.send(f"My prefix here is `.`", delete_after=15)
+            await message.channel.send(f"My prefix here is `{PREFIX}`", delete_after=15)
 
     await bot.process_commands(message)
 
