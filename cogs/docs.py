@@ -173,7 +173,7 @@ class Docs(commands.Cog, name="Documentation"):
     )
     async def rtfm(self, ctx, key: str = None, *, query: str = None):
         if not key or key.lower() not in self.page_types.keys():
-            query = key
+            query = key + query
             key = "antispam"
 
         await self.do_rtfm(ctx, key, query)
