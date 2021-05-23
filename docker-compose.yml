@@ -3,3 +3,4 @@ services:
   trev:
     image: trev
     build: .
+    restart: unless-stopped
