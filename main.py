@@ -1,7 +1,6 @@
 import io
 import os
 import re
-import json
 import logging
 import textwrap
 import contextlib
@@ -12,9 +11,7 @@ from discord.ext import commands
 
 from utils.util import clean_code, Pag
 
-with open("conf.json", "r") as f:
-    config = json.load(f)
-
+token = os.getenv("TOKEN")
 
 intents = discord.Intents.all()
 
@@ -135,4 +132,4 @@ if __name__ == "__main__":
                     )
                 )
 
-    bot.run(config["token"])
+    bot.run(token)
