@@ -6,12 +6,14 @@ import textwrap
 import contextlib
 from traceback import format_exception
 
+import aiohttp
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from utils.util import clean_code, Pag
 
 token = os.getenv("TOKEN")
+patch = os.getenv("UPTIME_PATCH")
 
 intents = discord.Intents.all()
 
@@ -132,8 +134,22 @@ async def _eval(ctx, *, code):
     await pager.start(ctx)
 
 
+@tasks.loop(minutes=10)
+async def update_uptime():
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url=f"https://betteruptime.com/api/v1/heartbeat/{patch}"):
+            pass
+
+
+@update_uptime.before_loop
+async def before_update_uptime():
+    await bot.wait_until_ready()
+
+
 # Load all extensions
 if __name__ == "__main__":
+    update_uptime.start()
+
     for ext in os.listdir("./cogs/"):
         if ext.endswith(".py") and not ext.startswith("_"):
             try:
