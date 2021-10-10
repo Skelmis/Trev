@@ -171,7 +171,7 @@ class Docs(commands.Cog, name="Documentation"):
         description="Gives you a documentation link for an entity.",
         aliases=["rtfd"],
     )
-    async def rtfm(self, ctx, key: str = None, *, query: str = None):
+    async def rtfm(self, ctx, key: str = None, *, query: str = ""):
         if not key or key.lower() not in self.page_types.keys():
             query = key + query
             key = "antispam"
