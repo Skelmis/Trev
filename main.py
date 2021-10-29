@@ -9,6 +9,7 @@ from traceback import format_exception
 import aiohttp
 import discord
 from antispam import AntiSpamHandler, Options
+from antispam.plugins import AdminLogs
 from discord.ext import commands, tasks
 
 from utils.util import clean_code, Pag
@@ -46,6 +47,10 @@ options.ban_threshold = 1
 options.delete_spam = True
 options.ignored_members.add(271612318947868673)
 bot.handler = AntiSpamHandler(bot, options=options)
+
+bot.admin_logs = AdminLogs(bot.handler, "./out/logs")
+
+bot.handler.register_plugin(bot.admin_logs)
 
 logger = logging.getLogger(__name__)
 
