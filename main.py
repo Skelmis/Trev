@@ -47,8 +47,6 @@ options.delete_spam = True
 options.ignored_members.add(271612318947868673)
 bot.handler = AntiSpamHandler(bot, options=options)
 
-bot.handler.add_guild_log_channel(903695242455298058, 780784732484141077)
-
 logger = logging.getLogger(__name__)
 
 # Use regex to parse mentions, much better than only supporting
@@ -60,6 +58,8 @@ mention = re.compile(r"^<@!?(?P<id>\d+)>$")
 @bot.event
 async def on_ready():
     print(f"{bot.user.name} is now ready\n-----")
+
+    await bot.handler.add_guild_log_channel(903695242455298058, 780784732484141077)
 
 
 @bot.event
