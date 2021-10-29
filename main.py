@@ -8,6 +8,7 @@ from traceback import format_exception
 
 import aiohttp
 import discord
+from antispam import AntiSpamHandler, Options
 from discord.ext import commands, tasks
 
 from utils.util import clean_code, Pag
@@ -30,14 +31,23 @@ async def get_prefix(bot, message):
 
     return commands.when_mentioned_or(prefix)(bot, message)
 
+
 bot = commands.Bot(
     command_prefix=get_prefix,
     case_insensitive=True,
     description="The bot powering the DPY Anti-Spam community",
     intents=intents,
     help_command=None,
-    activity=discord.Game(name="with guild security")
+    activity=discord.Game(name="with guild security"),
 )
+
+options = Options()
+options.ban_threshold = 1
+options.delete_spam = True
+options.ignored_members.add(271612318947868673)
+bot.handler = AntiSpamHandler(bot, options=options)
+
+bot.handler.add_guild_log_channel(903695242455298058, 780784732484141077)
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +67,8 @@ async def on_message(message):
     # Ignore messages sent by bots
     if message.author.bot:
         return
+
+    await bot.handler.propagate(message)
 
     # Whenever the bot is tagged, respond with its prefix
     if match := mention.match(message.content):
@@ -137,7 +149,9 @@ async def _eval(ctx, *, code):
 @tasks.loop(minutes=10)
 async def update_uptime():
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f"https://betteruptime.com/api/v1/heartbeat/{patch}"):
+        async with session.post(
+            url=f"https://betteruptime.com/api/v1/heartbeat/{patch}"
+        ):
             pass
 
 

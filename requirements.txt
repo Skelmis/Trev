@@ -7,3 +7,4 @@ discord.py==1.5.1
 idna==2.10
 multidict==4.7.6
 yarl==1.5.1
+discord-anti-spam==1.1.1
