@@ -1,4 +1,6 @@
-FROM python:3.9.5
+FROM python:3.9-slim-bullseye as common-base
+
+FROM common-base
 COPY . /trev
 WORKDIR trev
 
