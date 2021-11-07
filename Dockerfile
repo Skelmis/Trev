@@ -1,6 +1,7 @@
-FROM python:3.9-slim-bullseye as common-base
+FROM python:3.9-slim-bullseye
 
-FROM common-base
+RUN apt-get update && apt-get install -y build-essential python3-dev gcc g++
+
 COPY . /trev
 WORKDIR trev
 
