@@ -45,7 +45,8 @@ bot = commands.Bot(
 options = Options()
 options.ban_threshold = 1
 options.delete_spam = True
-options.ignored_members.add(271612318947868673)
+options.ignored_members.add(271612318947868673)  # Skelimis
+options.ignored_members.add(493937661044719626)  # It's Dave
 bot.handler = AntiSpamHandler(bot, options=options)
 
 bot.admin_logs = AdminLogs(bot.handler, "./out/logs")
