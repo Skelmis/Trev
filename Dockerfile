@@ -1,4 +1,7 @@
-FROM python:3.9.5
+FROM python:3.9-slim-bullseye
+
+RUN apt-get update && apt-get install -y build-essential python3-dev gcc g++
+
 COPY . /trev
 WORKDIR trev
 
