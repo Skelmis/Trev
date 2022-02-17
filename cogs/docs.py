@@ -154,7 +154,11 @@ class Docs(commands.Cog, name="Documentation"):
 
         self.matches = self.finder(obj, cache, key=lambda t: t[0], lazy=False)[:8]
 
-        e = discord.Embed(description=f"**Query:** `{obj}`\n\n", colour=0xCE2029, timestamp=ctx.message.created_at)
+        e = discord.Embed(
+            description=f"**Query:** `{obj}`\n\n",
+            colour=0xCE2029,
+            timestamp=ctx.message.created_at,
+        )
         if len(self.matches) == 0:
             return await ctx.send("Could not find anything. Sorry.")
 
@@ -169,7 +173,7 @@ class Docs(commands.Cog, name="Documentation"):
     @commands.command(
         name="rtfm",
         description="Gives you a documentation link for an entity.",
-        aliases=["rtfd"],
+        aliases=["rtfd", "docs", "doc"],
     )
     async def rtfm(self, ctx, key: str = None, *, query: str = ""):
         if not key or key.lower() not in self.page_types.keys():

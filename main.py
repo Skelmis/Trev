@@ -1,18 +1,14 @@
-import io
 import os
 import re
 import logging
-import textwrap
-import contextlib
-from traceback import format_exception
 
 import aiohttp
 import discord
 from antispam import AntiSpamHandler, Options
+from antispam.enums import Library
 from antispam.plugins import AdminLogs
 from discord.ext import commands, tasks
 
-from utils.util import clean_code, Pag
 
 token = os.getenv("TOKEN")
 patch = os.getenv("UPTIME_PATCH")
@@ -38,22 +34,32 @@ bot = commands.Bot(
     case_insensitive=True,
     description="The bot powering the DPY Anti-Spam community",
     intents=intents,
-    help_command=None,
     activity=discord.Game(name="with guild security"),
 )
 
 options = Options()
-options.ban_threshold = 1
 options.delete_spam = True
-options.ignored_members.add(271612318947868673)  # Skelimis
+options.use_timeouts = True
+options.ignored_members.add(271612318947868673)  # Skelmis
 options.ignored_members.add(493937661044719626)  # It's Dave
-bot.handler = AntiSpamHandler(bot, options=options)
+bot.handler = AntiSpamHandler(bot, options=options, library=Library.NEXTCORD)
 
 bot.admin_logs = AdminLogs(bot.handler, "./out/logs")
 
 bot.handler.register_plugin(bot.admin_logs)
 
-logger = logging.getLogger(__name__)
+logging.basicConfig(
+    format="%(levelname)-7s | %(asctime)s | %(filename)12s:%(funcName)-12s | %(message)s",
+    datefmt="%I:%M:%S %p %d/%m/%Y",
+    level=logging.INFO,
+)
+
+gateway_logger = logging.getLogger("nextcord.gateway")
+gateway_logger.setLevel(logging.WARNING)
+client_logger = logging.getLogger("nextcord.client")
+client_logger.setLevel(logging.WARNING)
+http_logger = logging.getLogger("nextcord.http")
+http_logger.setLevel(logging.WARNING)
 
 # Use regex to parse mentions, much better than only supporting
 # nickname mentions (<@!1234>)
@@ -97,59 +103,6 @@ async def on_member_join(member):
         f"Welcome {member.mention}!\nPlease check out {start_chan.mention} before continuing. Otherwise, enjoy the "
         f"server! "
     )
-
-
-@bot.command(description="Log the bot out.")
-@commands.is_owner()
-async def logout(ctx):
-    await ctx.send("Cya :wave:")
-    await bot.logout()
-
-
-@bot.command(name="eval", aliases=["exec"])
-@commands.is_owner()
-async def _eval(ctx, *, code):
-    """
-    Evaluates given code.
-    """
-    code = clean_code(code)
-
-    local_variables = {
-        "discord": discord,
-        "commands": commands,
-        "bot": bot,
-        "ctx": ctx,
-        "channel": ctx.channel,
-        "author": ctx.author,
-        "guild": ctx.guild,
-        "message": ctx.message,
-    }
-
-    stdout = io.StringIO()
-
-    try:
-        with contextlib.redirect_stdout(stdout):
-            exec(
-                f"async def func():\n{textwrap.indent(code, '    ')}",
-                local_variables,
-            )
-
-            obj = await local_variables["func"]()
-            result = f"{stdout.getvalue()}\n-- {obj}\n"
-
-    except Exception as e:
-        result = "".join(format_exception(e, e, e.__traceback__))
-
-    pager = Pag(
-        timeout=180,
-        use_defaults=True,
-        entries=[result[i : i + 2000] for i in range(0, len(result), 2000)],
-        length=1,
-        prefix="```py\n",
-        suffix="```",
-    )
-
-    await pager.start(ctx)
 
 
 @tasks.loop(minutes=10)
