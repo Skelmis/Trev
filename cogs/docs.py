@@ -1,11 +1,15 @@
+import datetime
 import io
+import logging
 import os
 import re
 import zlib
 
 import aiohttp
-import discord
-from discord.ext import commands
+import disnake
+from disnake.ext import commands
+
+log = logging.getLogger(__name__)
 
 
 # Sphinx reader pbject because d.py docs
@@ -48,7 +52,8 @@ class Docs(commands.Cog, name="Documentation"):
         self.bot = bot
         self.page_types = {
             "antispam": "https://dpy-anti-spam.readthedocs.io/en/latest/",
-            "discord.py": "https://discordpy.readthedocs.io/en/latest",
+            "alaric": "https://alaric.readthedocs.io/en/latest/",
+            "function-cooldowns": "https://function-cooldowns.readthedocs.io/en/latest/",
         }
 
     def finder(self, text, collection, *, key=None, lazy=True):
@@ -138,49 +143,55 @@ class Docs(commands.Cog, name="Documentation"):
 
         self._rtfm_cache = cache
 
-    async def do_rtfm(self, ctx, key, obj):
+    async def do_rtfm(self, interaction, key, obj):
         page_types = self.page_types
         key = key.lower()
 
         if obj is None:
-            await ctx.send(page_types[key])
+            await interaction.send(page_types[key])
             return
 
         if not hasattr(self, "_rtfm_cache"):
-            await ctx.trigger_typing()
             await self.build_rtfm_lookup_table(page_types)
 
         cache = list(self._rtfm_cache[key].items())
 
         self.matches = self.finder(obj, cache, key=lambda t: t[0], lazy=False)[:8]
 
-        e = discord.Embed(
+        e = disnake.Embed(
             description=f"**Query:** `{obj}`\n\n",
             colour=0xCE2029,
-            timestamp=ctx.message.created_at,
+            timestamp=datetime.datetime.now(),
         )
         if len(self.matches) == 0:
-            return await ctx.send("Could not find anything. Sorry.")
+            return await interaction.send("Could not find anything. Sorry.")
 
         e.description += "\n".join(f"[`{key}`]({url})" for key, url in self.matches)
-        e.set_footer(text=f"Requested by: {ctx.author.display_name}")
-        await ctx.send(embed=e)
+        e.set_footer(text=f"Requested by: {interaction.author.display_name}")
+        await interaction.send(embed=e)
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+        log.info(f"{self.__class__.__name__} Cog has been loaded")
 
-    @commands.command(
-        name="rtfm",
-        description="Gives you a documentation link for an entity.",
-        aliases=["rtfd", "docs", "doc"],
-    )
-    async def rtfm(self, ctx, key: str = None, *, query: str = ""):
-        if not key or key.lower() not in self.page_types.keys():
-            query = key + query
-            key = "antispam"
-
-        await self.do_rtfm(ctx, key, query)
+    @commands.slash_command()
+    async def docs(
+        self,
+        interaction: disnake.ApplicationCommandInteraction,
+        query=commands.Param(description="The documentation query to lookup"),
+        key=commands.Param(
+            choices={
+                "Antispam": "antispam",
+                "Alaric": "alaric",
+                "Function Cooldowns": "function-cooldowns",
+            },
+            default="Antispam",
+            description="Which package to perform the lookup on",
+        ),
+    ):
+        """Gives you a documentation link for an entity."""
+        await interaction.response.defer()
+        await self.do_rtfm(interaction, key, query)
 
 
 def setup(bot):

@@ -1,6 +1,6 @@
 import asyncio
 
-import discord
+import disnake
 
 
 def clean_code(content):
@@ -18,7 +18,7 @@ async def get_message(
     """
     This function sends an embed containing the params and then waits for a message to return
     """
-    embed = discord.Embed(
+    embed = disnake.Embed(
         title=f"{content_one}",
         description=f"{content_two}",
     )

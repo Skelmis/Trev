@@ -3,38 +3,28 @@ import re
 import logging
 
 import aiohttp
-import discord
+import disnake
 from antispam import AntiSpamHandler, Options
 from antispam.enums import Library
 from antispam.plugins import AdminLogs
-from discord.ext import commands, tasks
+from disnake.ext import commands, tasks
 
+log = logging.getLogger(__name__)
 
 token = os.getenv("TOKEN")
 patch = os.getenv("UPTIME_PATCH")
 
-intents = discord.Intents.all()
+intents = disnake.Intents.all()
 
 PREFIX = "py."
 
 
-async def get_prefix(bot, message):
-    prefix = PREFIX
-    if message.content.casefold().startswith(prefix.casefold()):
-        # The prefix matches, now return the one the user used
-        # such that dpy will dispatch the given command
-        prefix_length = len(prefix)
-        prefix = message.content[:prefix_length]
-
-    return commands.when_mentioned_or(prefix)(bot, message)
-
-
-bot = commands.Bot(
-    command_prefix=get_prefix,
+bot = commands.InteractionBot(
     case_insensitive=True,
     description="The bot powering the DPY Anti-Spam community",
     intents=intents,
-    activity=discord.Game(name="with guild security"),
+    activity=disnake.Game(name="with guild security"),
+    test_guilds=[780784732484141077],
 )
 
 options = Options()
@@ -42,7 +32,7 @@ options.delete_spam = True
 options.use_timeouts = True
 options.ignored_members.add(271612318947868673)  # Skelmis
 options.ignored_members.add(493937661044719626)  # It's Dave
-bot.handler = AntiSpamHandler(bot, options=options, library=Library.NEXTCORD)
+bot.handler = AntiSpamHandler(bot, options=options, library=Library.DISNAKE)
 
 bot.admin_logs = AdminLogs(bot.handler, "./out/logs")
 
@@ -54,22 +44,17 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-gateway_logger = logging.getLogger("nextcord.gateway")
+gateway_logger = logging.getLogger("disnake.gateway")
 gateway_logger.setLevel(logging.WARNING)
-client_logger = logging.getLogger("nextcord.client")
+client_logger = logging.getLogger("disnake.client")
 client_logger.setLevel(logging.WARNING)
-http_logger = logging.getLogger("nextcord.http")
+http_logger = logging.getLogger("disnake.http")
 http_logger.setLevel(logging.WARNING)
-
-# Use regex to parse mentions, much better than only supporting
-# nickname mentions (<@!1234>)
-# This basically ONLY matches a string that only consists of a mention
-mention = re.compile(r"^<@!?(?P<id>\d+)>$")
 
 
 @bot.event
 async def on_ready():
-    print(f"{bot.user.name} is now ready\n-----")
+    log.info(f"{bot.user.name} is now ready")
 
     await bot.handler.add_guild_log_channel(903695242455298058, 780784732484141077)
 
@@ -81,13 +66,6 @@ async def on_message(message):
         return
 
     await bot.handler.propagate(message)
-
-    # Whenever the bot is tagged, respond with its prefix
-    if match := mention.match(message.content):
-        if int(match.group("id")) == bot.user.id:
-            await message.channel.send(f"My prefix here is `{PREFIX}`", delete_after=15)
-
-    await bot.process_commands(message)
 
 
 @bot.event

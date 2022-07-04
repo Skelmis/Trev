@@ -1,7 +1,13 @@
-import discord
-from discord.ext import commands
+import datetime
+import logging
+
+import disnake
+from disnake import TextInputStyle
+from disnake.ext import commands
 
 from utils.util import get_message, review_embed
+
+log = logging.getLogger(__name__)
 
 
 class Utility(commands.Cog):
@@ -10,52 +16,72 @@ class Utility(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+        log.info(f"{self.__class__.__name__} Cog has been loaded")
 
-    @commands.command()
-    @commands.has_role(780785638244876309)
-    async def release(self, ctx):
-        """Create & send a new release notif"""
+    @commands.slash_command(
+        dm_permission=False,
+        default_member_permissions=disnake.Permissions(manage_guild=True),
+    )
+    async def release(
+        self,
+        interaction: disnake.ApplicationCommandInteraction,
+        package=commands.Param(
+            choices=["discord-anti-spam", "alaric", "function-cooldowns"],
+            description="Which package this release is for",
+        ),
+    ):
+        """Notify people of a new release"""
         release_role_id = 780792539761999912
         release_ping_str = f"<@&{release_role_id}>"
 
-        questions = [
-            [
-                "What type of release is this?",
-                "1 | Regular Release\n2 | Security Release",
+        custom_id = f"release_modal:{interaction.id}"
+        await interaction.response.send_modal(
+            title="Release notes",
+            custom_id=custom_id,
+            components=[
+                disnake.ui.TextInput(label="Release version", custom_id="version"),
+                disnake.ui.TextInput(
+                    label="Notable changes",
+                    custom_id="changes",
+                    style=TextInputStyle.long,
+                ),
+                # disnake.ui.Select(
+                #     custom_id="package",
+                #     options=["discord-anti-spam", "alaric", "function-cooldowns"],
+                # ),
             ],
-            ["What version are you releasing?", "\u2009"],
-            ["What is the content for this release?", "\u2009"],
-        ]
-        answers = [
-            await get_message(self.bot, ctx, question[0], question[1], timeout=500)
-            for question in questions
-        ]
+        )
+        modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
+            "modal_submit",
+            check=lambda i: i.custom_id == custom_id
+            and i.author.id == interaction.author.id,
+            timeout=300,
+        )
 
-        color_enum = {"1": 0x2C3E50, "2": 0xFF2800}  # Midnight grey  # Vibrant red
-        color = color_enum.get(answers[0], 0x2C3E50)
-
-        tag = answers[1]
+        tag = modal_inter.text_values["version"]
         if "v" not in tag.lower():
             tag = f"V{tag}"
         tag = tag.capitalize().replace(" ", "")
 
-        desc = f"{answers[2]}\n\n------------\nGet it with:\n`pip install -U Discord-Anti-Spam`"
-
-        embed = discord.Embed(
-            title=f"**Package Release:** `{tag}`",
-            description=desc,
-            color=color,
-            timestamp=ctx.message.created_at,
+        desc = (
+            f"Package: `{package}`\n"
+            f"New Version: `{tag}`\n------------\n\n"
+            f"{modal_inter.text_values['changes']}"
+            f"\n\n------------\nGet it with:\n`pip install -U {package}`"
         )
-        embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
 
-        if await review_embed(self.bot, ctx, embed):
-            channel = await self.bot.fetch_channel(780786972859564043)
-            await channel.send(release_ping_str, embed=embed)
-            await ctx.send(f"I sent that for you.")
-        else:
-            await ctx.send("Cancelling...")
+        embed = disnake.Embed(
+            title=f"**Package Release**",
+            description=desc,
+            timestamp=datetime.datetime.now(),
+        )
+        embed.set_footer(
+            text=interaction.author.name, icon_url=interaction.author.display_avatar
+        )
+        await modal_inter.send("Thanks!")
+
+        channel = await self.bot.fetch_channel(780786972859564043)
+        await channel.send(release_ping_str, embed=embed)
 
 
 def setup(bot):
